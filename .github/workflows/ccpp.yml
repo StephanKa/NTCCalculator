@@ -7,11 +7,26 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  linux:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        pattern: [0, 1]
     steps:
     - uses: actions/checkout@v2
-    - name: cmake-configure
-      uses: snickerbockers/cmake-configure@prerel1
+    - name: Configure
+      run: |
+        [ ${{ matrix.pattern }} == 0 ] && FLAGS="-DCMAKE_CXX_COMPILER=clang++"
+        [ ${{ matrix.pattern }} == 1 ] && FLAGS="-DCMAKE_CXX_COMPILER=g++"
+        cmake -S ${{ github.workspace }} -B ${{ runner.temp }} ${FLAGS}
+    - name: Check Header Dependencies
+      run: |
+        cmake --build ${{ runner.temp }} --parallel $(nproc) --clean-first --target check_deps
+    - name: Compile with Sanitizer
+      env:
+        CFLAGS:   -Werror -g -pedantic -Wall -Wextra -Wno-ignored-qualifiers -Wconversion -fno-omit-frame-pointer -fsanitize=address
+        CXXFLAGS: -Werror -g -pedantic -Wall -Wextra -Wno-ignored-qualifiers -Wconversion -fno-omit-frame-pointer -fsanitize=address
+        LDFLAGS:  -Werror -g -pedantic -Wall -Wextra -Wno-ignored-qualifiers -Wconversion -fno-omit-frame-pointer -fsanitize=address
+      run: |
+        CXXFLAGS="${CXXFLAGS}"
+        cmake --build ${{ runner.temp }} --parallel $(nproc) --clean-first
