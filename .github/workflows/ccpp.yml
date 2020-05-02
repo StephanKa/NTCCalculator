@@ -21,7 +21,7 @@ jobs:
         cmake -S ${{ github.workspace }} -B ${{ runner.temp }} ${FLAGS}
     - name: Check Header Dependencies
       run: |
-        cmake --build ${{ runner.temp }} --parallel $(nproc) --clean-first --target check_deps
+        cmake --build ${{ runner.temp }} --parallel $(nproc) --clean-first
     - name: Compile with Sanitizer
       env:
         CFLAGS:   -Werror -g -pedantic -Wall -Wextra -Wno-ignored-qualifiers -Wconversion -fno-omit-frame-pointer -fsanitize=address
