@@ -11,13 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        pattern: [0, 1]
+        compiler: [gcc, clang]
     steps:
     - uses: actions/checkout@v2
     - name: Configure
       run: |
-        [ ${{ matrix.pattern }} == 0 ] && FLAGS="-DCMAKE_CXX_COMPILER=clang++"
-        [ ${{ matrix.pattern }} == 1 ] && FLAGS="-DCMAKE_CXX_COMPILER=g++"
+        [ ${{ matrix.compiler }} == gcc ] && FLAGS="-DCMAKE_CXX_COMPILER=clang++"
+        [ ${{ matrix.compiler }} == clang ] && FLAGS="-DCMAKE_CXX_COMPILER=g++"
         cmake -S ${{ github.workspace }} -B ${{ runner.temp }} ${FLAGS}
     - name: Check Header Dependencies
       run: |
@@ -30,3 +30,14 @@ jobs:
       run: |
         CXXFLAGS="${CXXFLAGS}"
         cmake --build ${{ runner.temp }} --parallel $(nproc) --clean-first
+  build-windows:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, windows-2016]
+    steps:
+    - uses: actions/checkout@v1
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: build
+      run: cmake --build build --config Debug
