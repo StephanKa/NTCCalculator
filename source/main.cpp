@@ -1,11 +1,12 @@
 #include "ntc-sampling-point-calculator.h"
-#include <iostream>
+
+#include <fmt/format.h>
 
 int main()
 {
     constexpr auto ntcPoints = ntcSamplingPointCalculator<COUNT, true>();
-    for (auto& t : ntcPoints)
+    for (const auto& t : ntcPoints)
     {
-        std::cout << t << "\n";
+        fmt::print("{0}\n", t);
     }
 }
