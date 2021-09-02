@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        compiler: [gcc, clang]
+        compiler: [ {cpp: g++-11, c: gcc-11}, {cpp: clang++12, c: clang12} ]
 
     steps:
     - uses: actions/checkout@v2
@@ -40,7 +40,7 @@ jobs:
 
     - run:   |
              sudo apt update
-             sudo apt install gcc-11 g++-11 clang
+             sudo apt install gcc-11 g++-11 clang-12 llvm-12
       shell: bash
 
     - name: Install conan
@@ -56,12 +56,8 @@ jobs:
       shell: bash
       working-directory: ${{runner.workspace}}/build
       env:
-         CC: |
-         [ ${{ matrix.compiler }} == gcc ]gcc-11
-         [ ${{ matrix.compiler }} == gcc ]clang
-         CXX: |
-         [ ${{ matrix.compiler }} == gcc ]g++-11
-         [ ${{ matrix.compiler }} == gcc ]clang++
+         CC: ${{ matrix.compiler.c }}
+         CXX: ${{ matrix.compiler.cpp }}
       # Note the current convention is to use the -S and -B options here to specify source
       # and build directories, but this is only available with CMake 3.13 and higher.
       # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
