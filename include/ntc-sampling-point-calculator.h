@@ -15,26 +15,26 @@ constexpr float exp(float x)
 }
 }  // namespace Math
 
-template<typename Config, uint8_t ADC_RESOLUTION> constexpr auto ntcSamplingPointCalculator()
+template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr auto ntcSamplingPointCalculator()
 {
-    std::array<uint16_t, Config::COUNT> samplingPoints = {0};
+    std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
     constexpr auto powAdc = Math::pow(2, ADC_RESOLUTION);
-    constexpr auto refTempOffset = Config::OFFSET + Config::REF_TEMPERATURE;
-    constexpr auto tempDiff = (Config::MAX_TEMPERATURE - Config::MIN_TEMPERATURE) / Config::COUNT;
-    for (uint32_t i = 0; i < Config::COUNT; ++i)
+    constexpr auto refTempOffset = NTCConfig::OFFSET + NTCConfig::REF_TEMPERATURE;
+    constexpr auto tempDiff = (CircuitConfig::MAX_TEMPERATURE - CircuitConfig::MIN_TEMPERATURE) / CircuitConfig::COUNT;
+    for (uint32_t i = 0; i < CircuitConfig::COUNT; ++i)
     {
-        const float temperatureStep = (Config::MIN_TEMPERATURE + static_cast<float>(i) * tempDiff);
-        const float resistance = Config::RESISTANCE * Math::exp(Config::B_CONSTANT * (1.0f / (Config::OFFSET + temperatureStep) - 1.0f / refTempOffset));
+        const float temperatureStep = (CircuitConfig::MIN_TEMPERATURE + static_cast<float>(i) * tempDiff);
+        const float resistance = NTCConfig::RESISTANCE * Math::exp(NTCConfig::B_CONSTANT * (1.0f / (NTCConfig::OFFSET + temperatureStep) - 1.0f / refTempOffset));
         float voltage = {0.0f};
-        if constexpr (Config::PullDown)
+        if constexpr (NTCConfig::PullDown)
         {
-            voltage = Config::SUPPLY_VOLTAGE * (Config::RESISTANCE / (resistance + Config::RESISTANCE));
+            voltage = CircuitConfig::SUPPLY_VOLTAGE * (CircuitConfig::PRE_RESISTANCE / (resistance + CircuitConfig::PRE_RESISTANCE));
         }
         else
         {
-            voltage = Config::SUPPLY_VOLTAGE * (resistance / (resistance + Config::RESISTANCE));
+            voltage = CircuitConfig::SUPPLY_VOLTAGE * (resistance / (resistance + CircuitConfig::PRE_RESISTANCE));
         }
-        samplingPoints[i] = static_cast<uint16_t>((powAdc * voltage) / Config::SUPPLY_VOLTAGE);
+        samplingPoints[i] = static_cast<uint16_t>((powAdc * voltage) / CircuitConfig::SUPPLY_VOLTAGE);
     }
     return samplingPoints;
 }
