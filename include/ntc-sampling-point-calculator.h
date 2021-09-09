@@ -21,21 +21,21 @@ using Volt = float;
 
 struct OhmTemperature
 {
-    Ohm ohm;
-    Temperature temp;
+    Ohm ohm = {0.0f};
+    Temperature temp = {0.0f};
 };
 
 struct VoltTemperature
 {
-    Volt voltage;
-    Temperature temp;
+    Volt voltage = {0.0f};
+    Temperature temp = {0.0f};
 };
 
 static constexpr Temperature OFFSET = {273.15f};
 
 template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> constexpr auto ntcResistance()
 {
-    std::array<OhmTemperature, CircuitConfig::COUNT> resistances = {0};
+    std::array<OhmTemperature, CircuitConfig::COUNT> resistances;
     constexpr auto refTempOffset = OFFSET + NTCConfig::REF_TEMPERATURE;
     constexpr auto tempDiff = (CircuitConfig::MAX_TEMPERATURE - CircuitConfig::MIN_TEMPERATURE) / CircuitConfig::COUNT;
     for (uint32_t i = 0; i < CircuitConfig::COUNT; ++i)
@@ -56,7 +56,7 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
 
 template<typename CircuitConfig, typename NTCConfig> constexpr auto ntcVoltages()
 {
-    std::array<VoltTemperature, CircuitConfig::COUNT> voltages = {0};
+    std::array<VoltTemperature, CircuitConfig::COUNT> voltages;
     constexpr auto resistances = ntcResistance<CircuitConfig, NTCConfig>();
     size_t index = 0u;
     for (const auto& resistance : resistances)
