@@ -11,7 +11,7 @@ TARGET_LINK_LIBRARIES(catch_main PRIVATE project_options)
 
 ADD_EXECUTABLE(tests tests.cpp)
 TARGET_LINK_LIBRARIES(tests PRIVATE project_warnings project_options catch_main)
-TARGET_INCLUDE_DIRECTORIES(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src/include)
+TARGET_INCLUDE_DIRECTORIES(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 
 # automatically discover tests that are defined in catch based test files you can modify the unittests. Set TEST_PREFIX
 # to whatever you want, or use different for different binaries

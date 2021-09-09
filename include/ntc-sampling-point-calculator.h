@@ -15,26 +15,80 @@ constexpr float exp(float x)
 }
 }  // namespace Math
 
-template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr auto ntcSamplingPointCalculator()
+using Temperature = float;
+using Ohm = float;
+using Volt = float;
+
+struct OhmTemperature
 {
-    std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
-    constexpr auto powAdc = Math::pow(2, ADC_RESOLUTION);
-    constexpr auto refTempOffset = NTCConfig::OFFSET + NTCConfig::REF_TEMPERATURE;
+    Ohm ohm;
+    Temperature temp;
+};
+
+struct VoltTemperature
+{
+    Volt voltage;
+    Temperature temp;
+};
+
+static constexpr Temperature OFFSET = {273.15f};
+
+template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> constexpr auto ntcResistance()
+{
+    std::array<OhmTemperature, CircuitConfig::COUNT> resistances = {0};
+    constexpr auto refTempOffset = OFFSET + NTCConfig::REF_TEMPERATURE;
     constexpr auto tempDiff = (CircuitConfig::MAX_TEMPERATURE - CircuitConfig::MIN_TEMPERATURE) / CircuitConfig::COUNT;
     for (uint32_t i = 0; i < CircuitConfig::COUNT; ++i)
     {
         const float temperatureStep = (CircuitConfig::MIN_TEMPERATURE + static_cast<float>(i) * tempDiff);
-        const float resistance = NTCConfig::RESISTANCE * Math::exp(NTCConfig::B_CONSTANT * (1.0f / (NTCConfig::OFFSET + temperatureStep) - 1.0f / refTempOffset));
-        float voltage = {0.0f};
+        const float resistance = NTCConfig::RESISTANCE * Math::exp(NTCConfig::B_CONSTANT * (1.0f / (OFFSET + temperatureStep) - 1.0f / refTempOffset));
+        OhmTemperature temp{};
+        temp.ohm = resistance;
+        temp.temp = temperatureStep;
+        if constexpr (IntegrateOffset)
+        {
+            temp.temp = OFFSET + temperatureStep;
+        }
+        resistances[i] = temp;
+    }
+    return resistances;
+}
+
+template<typename CircuitConfig, typename NTCConfig> constexpr auto ntcVoltages()
+{
+    std::array<VoltTemperature, CircuitConfig::COUNT> voltages = {0};
+    constexpr auto resistances = ntcResistance<CircuitConfig, NTCConfig>();
+    size_t index = 0u;
+    for (const auto& resistance : resistances)
+    {
+        Volt voltage = {0.0f};
         if constexpr (NTCConfig::PullDown)
         {
-            voltage = CircuitConfig::SUPPLY_VOLTAGE * (CircuitConfig::PRE_RESISTANCE / (resistance + CircuitConfig::PRE_RESISTANCE));
+            voltage = CircuitConfig::SUPPLY_VOLTAGE * (CircuitConfig::PRE_RESISTANCE / (resistance.ohm + CircuitConfig::PRE_RESISTANCE));
         }
         else
         {
-            voltage = CircuitConfig::SUPPLY_VOLTAGE * (resistance / (resistance + CircuitConfig::PRE_RESISTANCE));
+            voltage = CircuitConfig::SUPPLY_VOLTAGE * (resistance.ohm / (resistance.ohm + CircuitConfig::PRE_RESISTANCE));
         }
-        samplingPoints[i] = static_cast<uint16_t>((powAdc * voltage) / CircuitConfig::SUPPLY_VOLTAGE);
+        VoltTemperature temp{};
+        temp.voltage = voltage;
+        temp.temp = resistance.temp;
+        voltages[index] = temp;
+        index++;
+    }
+    return voltages;
+}
+
+template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr auto ntcSamplingPointCalculator()
+{
+    constexpr auto powAdc = Math::pow(2, ADC_RESOLUTION);
+    constexpr auto voltages = ntcVoltages<CircuitConfig, NTCConfig>();
+    std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
+    size_t index = 0u;
+    for (const auto& voltage : voltages)
+    {
+        samplingPoints[index] = static_cast<uint16_t>((powAdc * voltage.voltage) / CircuitConfig::SUPPLY_VOLTAGE);
+        index++;
     }
     return samplingPoints;
 }
