@@ -1,4 +1,4 @@
-#include "ntc-sampling-point-calculator.h"
+#include "NTCCalculator.h"
 
 #include <fmt/format.h>
 

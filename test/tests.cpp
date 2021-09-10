@@ -1,5 +1,5 @@
+#include <NTCCalculator.h>
 #include <catch2/catch.hpp>
-#include <ntc-sampling-point-calculator.h>
 
 struct NTCConfig
 {
