@@ -23,7 +23,7 @@ constexpr uint8_t ADC_RESOLUTION = 12u;
 
 int main()
 {
-    constexpr auto ntcPoints = ntcSamplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+    constexpr auto ntcPoints = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
     fmt::print("Count: {0}\n", CircuitConfig::COUNT);
     for (const auto& t : ntcPoints)
     {

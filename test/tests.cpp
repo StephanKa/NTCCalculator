@@ -25,13 +25,13 @@ struct CircuitConfig
 
 TEST_CASE("Resistance", "TestCalculation")
 {
-    constexpr auto ntcPoints = ntcResistance<CircuitConfig, NTCConfig>();
+    constexpr auto ntcPoints = NTC::resistance<CircuitConfig, NTCConfig>();
     std::array<uint32_t, CircuitConfig::COUNT> refValues = {12643u, 10803u, 9264u, 7970u, 6880u, 5958u, 5175u, 4508u, 3939u, 3451u, 3031u, 2670u,
                                                             2358u,  2087u,  1851u, 1646u, 1467u, 1309u, 1169u, 1046u, 935u,  834u,  742u,  656u};
     size_t index = 0u;
     for (const auto& ref : refValues)
     {
-        REQUIRE(static_cast<uint32_t>(ntcPoints[index].ohm) == ref);
+        REQUIRE(static_cast<uint32_t>(ntcPoints[index].resistance) == ref);
         index++;
     }
 }

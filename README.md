@@ -60,17 +60,17 @@ struct VoltTemperature
 };
 ```
 
-### Methods
+#### Methods
 
 ```c++
-    constexpr bool IntegrateTempOffset = true; // defines if temperature shall be compensated to K or leave a °C
-    // calculate only the resistances for given temperature steps
-    constexpr OhmTemperature resistances = ntcResistance<CircuitConfig, NTCConfig, IntegrateTempOffset>();
-    // calculate only the volatges for given temperature steps
-    constexpr VoltTemperature voltages = ntcVoltages<CircuitConfig, NTCConfig>();
-    // calculate only the resistances for given temperature steps
-    constexpr uint8_t ADC_RESOLUTION = 12u;
-    constexpr auto ntcSamplingPoints = ntcSamplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+constexpr bool IntegrateTempOffset = true; // defines if temperature shall be compensated to K or leave a °C
+// calculate only the resistances for given temperature steps
+constexpr NTC::OhmTemperature resistances = NTC::resistance<CircuitConfig, NTCConfig, IntegrateTempOffset>();
+// calculate only the volatges for given temperature steps
+constexpr NTC::VoltTemperature voltages = NTC::voltage<CircuitConfig, NTCConfig>();
+// calculate only the resistances for given temperature steps
+constexpr uint8_t ADC_RESOLUTION = 12u;
+constexpr auto ntcSamplingPoints = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
 ```
 
 ### Example
@@ -99,7 +99,7 @@ constexpr uint8_t ADC_RESOLUTION = 12u;
 
 int main()
 {
-    constexpr auto ntcPoints = ntcSamplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+    constexpr auto ntcPoints = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
     fmt::print("Count: {0}\n", CircuitConfig::COUNT);
     for (const auto& t : ntcPoints)
     {
@@ -108,3 +108,26 @@ int main()
 }
 
 ```
+
+## Output
+
+```c++
+constexpr OhmTemperature resistances = NTC::resistance<CircuitConfig, NTCConfig, IntegrateTempOffset>();
+```
+
+[Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/PGxqnM196)
+
+```c++
+constexpr VoltTemperature voltages = NTC::voltage<CircuitConfig, NTCConfig>();
+```
+
+[Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/479coovdd)
+
+```c++
+constexpr uint8_t ADC_RESOLUTION = 12u;
+constexpr auto ntcSamplingPoints = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+```
+
+[Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/aT6GY7K1Y)
+
+
