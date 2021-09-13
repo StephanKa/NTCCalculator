@@ -1,6 +1,7 @@
 # NTC calculation during compile time
 
-![example workflow](https://github.com/StephanKa/ntc_sample_calculator/actions/workflows/build_cmake.yml/badge.svg)
+![C++ workflow](https://github.com/StephanKa/ntc_sample_calculator/actions/workflows/build_cmake.yml/badge.svg)
+![CodeQL](https://github.com/StephanKa/ntc_sample_calculator/workflows/CodeQL/badge.svg)
 
 ## General
 
@@ -130,4 +131,6 @@ constexpr auto ntcSamplingPoints = NTC::samplingPointCalculator<CircuitConfig, N
 
 [Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/aT6GY7K1Y)
 
+## To-Do
 
+- [ ] add small ascii circuit output 
