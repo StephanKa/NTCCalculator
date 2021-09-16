@@ -2,6 +2,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <fmt/format.h>
 
 namespace Math {
 constexpr float pow(float x, int y) { return y == 0 ? 1.0f : x * pow(x, y - 1); }
@@ -15,9 +16,9 @@ constexpr float exp(float x)
 }
 }  // namespace Math
 
-using Temperature = float;
-using Ohm = float;
-using Volt = float;
+typedef float Temperature;
+typedef float Ohm;
+typedef float Volt;
 
 namespace NTC {
 struct OhmTemperature
@@ -93,4 +94,47 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> con
     }
     return samplingPoints;
 }
+
+namespace Draw {
+template<Ohm Resistor> constexpr void resistance(std::string_view custom = "")
+{
+    for (int i = 0; i < 5; i++)
+    {
+        if (i == 2)
+        {
+            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", 18, 4, "", Resistor, custom);
+        }
+        else
+        {
+            fmt::print("{0:>{1}}{0:>{2}}\n", "|", 18, 4);
+        }
+    }
+}
+
+template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr void dump()
+{
+    fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE);
+    if constexpr (NTCConfig::PullDown)
+    {
+        resistance<CircuitConfig::PRE_RESISTANCE>();
+    }
+    else
+    {
+        resistance<NTCConfig::RESISTANCE>("(NTC)");
+    }
+
+    fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", 20, "|", "", ADC_RESOLUTION);
+
+    if constexpr (NTCConfig::PullDown)
+    {
+        resistance<NTCConfig::RESISTANCE>("(NTC)");
+    }
+    else
+    {
+        resistance<CircuitConfig::PRE_RESISTANCE>();
+    }
+
+    fmt::print("{2:>{1}}\n{2:>{1}}\n{2:>{1}}\n{0:-^{3}}\n", "", 20, "|", 19);
+}
+}  // namespace Draw
 }  // namespace NTC

@@ -1,7 +1,5 @@
 #include "NTCCalculator.h"
 
-#include <fmt/format.h>
-
 struct NTCConfig
 {
     static constexpr Ohm RESISTANCE = {10000.0f};
@@ -27,6 +25,9 @@ int main()
     fmt::print("Count: {0}\n", CircuitConfig::COUNT);
     for (const auto& t : ntcPoints)
     {
-        fmt::print("{0} - {1}mV\n", t, t * CircuitConfig::SUPPLY_VOLTAGE * 1000.0f / Math::pow(2, ADC_RESOLUTION));
+        fmt::print("{0} - {1}mV\n", t, static_cast<float>(t) * CircuitConfig::SUPPLY_VOLTAGE * 1000.0f / Math::pow(2, ADC_RESOLUTION));
     }
+
+    // dump the circuit as ASCII
+    NTC::Draw::dump<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
 }
