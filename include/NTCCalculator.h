@@ -16,9 +16,9 @@ constexpr float exp(float x)
 }
 }  // namespace Math
 
-typedef float Temperature;
-typedef float Ohm;
-typedef float Volt;
+using Temperature = float;
+using Ohm = float;
+using Volt = float;
 
 namespace NTC {
 struct OhmTemperature
