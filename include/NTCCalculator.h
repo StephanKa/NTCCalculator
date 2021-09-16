@@ -111,7 +111,7 @@ constexpr void resistance(Ohm resistor, std::string_view custom = "")
     }
 }
 
-template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr void dump()
+template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> void dump()
 {
     fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE);
     if constexpr (NTCConfig::PullDown)
