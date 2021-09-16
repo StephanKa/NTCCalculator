@@ -96,13 +96,13 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> con
 }
 
 namespace Draw {
-template<auto Resistor> constexpr void resistance(std::string_view custom = "")
+constexpr void resistance(Ohm resistor, std::string_view custom = "")
 {
     for (int i = 0; i < 5; i++)
     {
         if (i == 2)
         {
-            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", 18, 4, "", Resistor, custom);
+            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", 18, 4, "", resistor, custom);
         }
         else
         {
@@ -116,22 +116,22 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> con
     fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE);
     if constexpr (NTCConfig::PullDown)
     {
-        resistance<CircuitConfig::PRE_RESISTANCE>();
+        resistance(CircuitConfig::PRE_RESISTANCE);
     }
     else
     {
-        resistance<NTCConfig::RESISTANCE>("(NTC)");
+        resistance(NTCConfig::RESISTANCE, "(NTC)");
     }
 
     fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", 20, "|", "", ADC_RESOLUTION);
 
     if constexpr (NTCConfig::PullDown)
     {
-        resistance<NTCConfig::RESISTANCE>("(NTC)");
+        resistance(NTCConfig::RESISTANCE, "(NTC)");
     }
     else
     {
-        resistance<CircuitConfig::PRE_RESISTANCE>();
+        resistance(CircuitConfig::PRE_RESISTANCE);
     }
 
     fmt::print("{2:>{1}}\n{2:>{1}}\n{2:>{1}}\n{0:-^{3}}\n", "", 20, "|", 19);
