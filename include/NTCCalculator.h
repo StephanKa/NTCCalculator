@@ -96,7 +96,7 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> con
 }
 
 namespace Draw {
-template<Ohm Resistor> constexpr void resistance(std::string_view custom = "")
+template<auto Resistor> constexpr void resistance(std::string_view custom = "")
 {
     for (int i = 0; i < 5; i++)
     {
