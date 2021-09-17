@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'cpp' ]
-        compiler: [ {cpp: g++-10, c: gcc-10}, {cpp: g++-11, c: gcc-11}, {cpp: clang++-10, c: clang-10}, {cpp: clang++-11, c: clang-11}, {cpp: clang++-12, c: clang-12} ]
+        compiler: [ {cpp: g++-10, c: gcc-10}, {cpp: g++-11, c: gcc-11}, {cpp: clang++-11, c: clang-11}, {cpp: clang++-12, c: clang-12} ]
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
         # Learn more:
         # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
