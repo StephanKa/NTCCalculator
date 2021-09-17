@@ -35,7 +35,7 @@ struct VoltTemperature
 
 static constexpr Temperature OFFSET = {273.15f};
 
-template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> auto resistance()
+template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> constexpr auto resistance()
 {
     std::array<OhmTemperature, CircuitConfig::COUNT> resistances;
     constexpr auto refTempOffset = OFFSET + NTCConfig::REF_TEMPERATURE;
@@ -111,7 +111,7 @@ constexpr void resistance(Ohm resistor, std::string_view custom = "")
     }
 }
 
-template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> void dump()
+template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr void dump()
 {
     fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE);
     if constexpr (NTCConfig::PullDown)
