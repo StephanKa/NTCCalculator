@@ -133,4 +133,3 @@ constexpr auto ntcSamplingPoints = NTC::samplingPointCalculator<CircuitConfig, N
 
 ## To-Do
 
-- [ ] add small ascii circuit output 
