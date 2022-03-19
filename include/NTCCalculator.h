@@ -11,8 +11,12 @@ constexpr int factorial(int x) { return x == 0 ? 1 : x * factorial(x - 1); }
 
 constexpr float exp(float x)
 {
-    return 1.0f + x + pow(x, 2) / factorial(2) + pow(x, 3) / factorial(3) + pow(x, 4) / factorial(4) + pow(x, 5) / factorial(5) + pow(x, 6) / factorial(6)
-           + pow(x, 7) / factorial(7) + pow(x, 8) / factorial(8) + pow(x, 9) / factorial(9);
+    float temp = 1.0f + x;
+    for (int i = 2; i <= 9; i++)
+    {
+        temp += pow(x, i) / static_cast<float>(factorial(i));
+    }
+    return temp;
 }
 }  // namespace Math
 
@@ -23,12 +27,16 @@ using Volt = float;
 namespace NTC {
 struct OhmTemperature
 {
+    constexpr OhmTemperature() = default;
+    constexpr OhmTemperature(Ohm resistance, Temperature temp) : resistance(resistance), temp(temp){};
     Ohm resistance = {0.0f};
     Temperature temp = {0.0f};
 };
 
 struct VoltTemperature
 {
+    constexpr VoltTemperature() = default;
+    constexpr VoltTemperature(Volt voltage, Temperature temp) : voltage(voltage), temp(temp){};
     Volt voltage = {0.0f};
     Temperature temp = {0.0f};
 };
@@ -44,9 +52,7 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
     {
         const float temperatureStep = (CircuitConfig::MIN_TEMPERATURE + static_cast<float>(i) * tempDiff);
         const float resistance = NTCConfig::RESISTANCE * Math::exp(NTCConfig::B_CONSTANT * (1.0f / (OFFSET + temperatureStep) - 1.0f / refTempOffset));
-        OhmTemperature temp{};
-        temp.resistance = resistance;
-        temp.temp = temperatureStep;
+        OhmTemperature temp(resistance, temperatureStep);
         if constexpr (IntegrateOffset)
         {
             temp.temp = OFFSET + temperatureStep;
@@ -63,27 +69,25 @@ template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
     size_t index = 0u;
     for (const auto& resistance : resistances)
     {
-        Volt voltage = {0.0f};
+        constexpr Volt voltage = CircuitConfig::SUPPLY_VOLTAGE * (resistance.resistance + CircuitConfig::PRE_RESISTANCE);
         if constexpr (NTCConfig::PullDown)
         {
-            voltage = CircuitConfig::SUPPLY_VOLTAGE * (CircuitConfig::PRE_RESISTANCE / (resistance.resistance + CircuitConfig::PRE_RESISTANCE));
+            voltage *= CircuitConfig::PRE_RESISTANCE;
         }
         else
         {
-            voltage = CircuitConfig::SUPPLY_VOLTAGE * (resistance.resistance / (resistance.resistance + CircuitConfig::PRE_RESISTANCE));
+            voltage *= resistance.resistance;
         }
-        VoltTemperature temp{};
-        temp.voltage = voltage;
-        temp.temp = resistance.temp;
+        VoltTemperature temp(voltage, resistance.temp);
         voltages[index] = temp;
         index++;
     }
     return voltages;
 }
 
-template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr auto samplingPointCalculator()
+template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr auto samplingPointCalculator()
 {
-    constexpr auto powAdc = Math::pow(2, ADC_RESOLUTION);
+    constexpr auto powAdc = Math::pow(2, AdcResolution);
     constexpr auto voltages = voltage<CircuitConfig, NTCConfig>();
     std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
     size_t index = 0u;
@@ -111,7 +115,7 @@ constexpr void resistance(Ohm resistor, std::string_view custom = "")
     }
 }
 
-template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> constexpr void dump()
+template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr void dump()
 {
     fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE);
     if constexpr (NTCConfig::PullDown)
@@ -123,7 +127,7 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t ADC_RESOLUTION> con
         resistance(NTCConfig::RESISTANCE, "(NTC)");
     }
 
-    fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", 20, "|", "", ADC_RESOLUTION);
+    fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", 20, "|", "", AdcResolution);
 
     if constexpr (NTCConfig::PullDown)
     {
