@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.16)
 
 # Set the project name to your project name, my project isn't very descriptive
 PROJECT(ntc-compile-time CXX)
-SET(CMAKE_BUILD_PARALLEL_LEVEL 4)
+SET(CMAKE_BUILD_PARALLEL_LEVEL 8)
 
 INCLUDE(cmake/StandardProjectSettings.cmake)
 INCLUDE(cmake/PreventInSourceBuilds.cmake)

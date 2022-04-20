@@ -3,24 +3,19 @@
 
 struct NTCConfig
 {
-    using Temperature = float;
-    using Ohm = float;
-    static constexpr Ohm RESISTANCE = {10000.0f};
-    static constexpr float B_CONSTANT = {4100.0f};
-    static constexpr Temperature REF_TEMPERATURE = {25.0f};
-    static constexpr Temperature OFFSET = {273.15f};
-    static constexpr bool PullDown = {false};
+    static constexpr auto RESISTANCE = Ohm(10000.0f);
+    static constexpr float B_CONSTANT{4100.0f};
+    static constexpr auto REF_TEMPERATURE = Temperature(25.0f);
+    static constexpr bool PullDown{false};
 };
 
 struct CircuitConfig
 {
-    using Temperature = float;
-    using Ohm = float;
-    static constexpr Temperature MIN_TEMPERATURE = 20.0f;
-    static constexpr Temperature MAX_TEMPERATURE = 100.0f;
-    static constexpr uint32_t COUNT = 24;
-    static constexpr float SUPPLY_VOLTAGE = {3.3f};
-    static constexpr Ohm PRE_RESISTANCE = {10000.0f};
+    static constexpr auto MIN_TEMPERATURE = Temperature(20.0f);
+    static constexpr auto MAX_TEMPERATURE = Temperature(100.0f);
+    static constexpr uint32_t COUNT{24u};
+    static constexpr auto SUPPLY_VOLTAGE = Volt(3.3f);
+    static constexpr auto PRE_RESISTANCE = Ohm(10000.0f);
 };
 
 TEST_CASE("Resistance", "TestCalculation")
@@ -31,7 +26,7 @@ TEST_CASE("Resistance", "TestCalculation")
     size_t index = 0u;
     for (const auto& ref : refValues)
     {
-        REQUIRE(static_cast<uint32_t>(ntcPoints[index].resistance) == ref);
+        REQUIRE(static_cast<uint32_t>(ntcPoints.at(index).resistance()) == ref);
         index++;
     }
 }

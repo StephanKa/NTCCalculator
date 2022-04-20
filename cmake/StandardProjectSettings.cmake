@@ -15,7 +15,7 @@ IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 ENDIF()
 
 # Generate compile_commands.json to make it easier to work with clang based tools
-SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 OPTION(ENABLE_IPO "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
 
@@ -39,4 +39,3 @@ ELSEIF(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 ELSE()
     MESSAGE(STATUS "No colored compiler diagnostic set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 ENDIF()
-

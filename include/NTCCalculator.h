@@ -4,58 +4,79 @@
 #include <cstdint>
 #include <fmt/format.h>
 
+template<typename T> class NamedType
+{
+public:
+    NamedType() = default;
+    constexpr explicit NamedType(const T& value) : m_value(value) {}
+    constexpr explicit NamedType(T&& value) : m_value(std::move(value)) {}
+
+    constexpr NamedType& operator=(T value)
+    {
+        m_value = value;
+        return *this;
+    }
+    constexpr T operator()() const { return m_value; }
+
+private:
+    T m_value{};
+};
+
 namespace Math {
 constexpr float pow(float x, int y) { return y == 0 ? 1.0f : x * pow(x, y - 1); }
 
 constexpr int factorial(int x) { return x == 0 ? 1 : x * factorial(x - 1); }
 
-constexpr float exp(float x)
+template<int EXP_COUNT = 9> constexpr float exp(float x)
 {
     float temp = 1.0f + x;
-    for (int i = 2; i <= 9; i++)
+    for (int i = 2; i <= EXP_COUNT; i++)
     {
         temp += pow(x, i) / static_cast<float>(factorial(i));
     }
     return temp;
 }
+
 }  // namespace Math
 
-using Temperature = float;
-using Ohm = float;
-using Volt = float;
+using Temperature = NamedType<float>;
+using Ohm = NamedType<float>;
+using Volt = NamedType<float>;
 
 namespace NTC {
 struct OhmTemperature
 {
-    constexpr OhmTemperature() = default;
-    constexpr OhmTemperature(Ohm resistance, Temperature temp) : resistance(resistance), temp(temp){};
-    Ohm resistance = {0.0f};
-    Temperature temp = {0.0f};
+    OhmTemperature() = default;
+    constexpr OhmTemperature(const Ohm& resist, const Temperature& temperature) : resistance(resist()), temp(temperature()){};
+    constexpr OhmTemperature(float resist, float temperature) : resistance(resist), temp(temperature){};
+    Ohm resistance;
+    Temperature temp;
 };
 
 struct VoltTemperature
 {
-    constexpr VoltTemperature() = default;
-    constexpr VoltTemperature(Volt voltage, Temperature temp) : voltage(voltage), temp(temp){};
-    Volt voltage = {0.0f};
-    Temperature temp = {0.0f};
+    VoltTemperature() = default;
+    constexpr VoltTemperature(const Volt& volt, const Temperature& temperature) : voltage(volt()), temp(temperature()){};
+    constexpr VoltTemperature(float volt, float temperature) : voltage(volt), temp(temperature){};
+    Volt voltage;
+    Temperature temp;
 };
 
-static constexpr Temperature OFFSET = {273.15f};
+static constexpr Temperature OFFSET{273.15f};
 
 template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> constexpr auto resistance()
 {
     std::array<OhmTemperature, CircuitConfig::COUNT> resistances;
-    constexpr auto refTempOffset = OFFSET + NTCConfig::REF_TEMPERATURE;
-    constexpr auto tempDiff = (CircuitConfig::MAX_TEMPERATURE - CircuitConfig::MIN_TEMPERATURE) / CircuitConfig::COUNT;
+    constexpr auto REF_TEMP_OFFSET = OFFSET() + NTCConfig::REF_TEMPERATURE();
+    constexpr auto TEMP_DIFF = (CircuitConfig::MAX_TEMPERATURE() - CircuitConfig::MIN_TEMPERATURE()) / CircuitConfig::COUNT;
     for (uint32_t i = 0; i < CircuitConfig::COUNT; ++i)
     {
-        const float temperatureStep = (CircuitConfig::MIN_TEMPERATURE + static_cast<float>(i) * tempDiff);
-        const float resistance = NTCConfig::RESISTANCE * Math::exp(NTCConfig::B_CONSTANT * (1.0f / (OFFSET + temperatureStep) - 1.0f / refTempOffset));
-        OhmTemperature temp(resistance, temperatureStep);
+        const float TEMPERATURE_STEP = (CircuitConfig::MIN_TEMPERATURE() + static_cast<float>(i) * TEMP_DIFF);
+        const float RESISTANCE = NTCConfig::RESISTANCE() * Math::exp(NTCConfig::B_CONSTANT * (1.0f / (OFFSET() + TEMPERATURE_STEP) - 1.0f / REF_TEMP_OFFSET));
+        OhmTemperature temp(RESISTANCE, TEMPERATURE_STEP);
         if constexpr (IntegrateOffset)
         {
-            temp.temp = OFFSET + temperatureStep;
+            temp.temp = OFFSET() + TEMPERATURE_STEP;
         }
         resistances[i] = temp;
     }
@@ -65,21 +86,19 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
 template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
 {
     std::array<VoltTemperature, CircuitConfig::COUNT> voltages;
-    constexpr auto resistances = resistance<CircuitConfig, NTCConfig>();
     size_t index = 0u;
-    for (const auto& resistance : resistances)
+    for (const auto& resist : resistance<CircuitConfig, NTCConfig>())
     {
-        constexpr Volt voltage = CircuitConfig::SUPPLY_VOLTAGE * (resistance.resistance + CircuitConfig::PRE_RESISTANCE);
+        auto voltage = 0.0f;
         if constexpr (NTCConfig::PullDown)
         {
-            voltage *= CircuitConfig::PRE_RESISTANCE;
+            voltage = CircuitConfig::SUPPLY_VOLTAGE() * (CircuitConfig::PRE_RESISTANCE() / (resist.resistance() + CircuitConfig::PRE_RESISTANCE()));
         }
         else
         {
-            voltage *= resistance.resistance;
+            voltage = CircuitConfig::SUPPLY_VOLTAGE() * (resist.resistance() / (resist.resistance() + CircuitConfig::PRE_RESISTANCE()));
         }
-        VoltTemperature temp(voltage, resistance.temp);
-        voltages[index] = temp;
+        voltages[index] = VoltTemperature(voltage, resist.temp());
         index++;
     }
     return voltages;
@@ -88,12 +107,11 @@ template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
 template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr auto samplingPointCalculator()
 {
     constexpr auto powAdc = Math::pow(2, AdcResolution);
-    constexpr auto voltages = voltage<CircuitConfig, NTCConfig>();
     std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
     size_t index = 0u;
-    for (const auto& volt : voltages)
+    for (const auto& volt : voltage<CircuitConfig, NTCConfig>())
     {
-        samplingPoints[index] = static_cast<uint16_t>((powAdc * volt.voltage) / CircuitConfig::SUPPLY_VOLTAGE);
+        samplingPoints[index] = static_cast<uint16_t>((powAdc * volt.voltage()) / CircuitConfig::SUPPLY_VOLTAGE());
         index++;
     }
     return samplingPoints;
@@ -106,7 +124,7 @@ constexpr void resistance(Ohm resistor, std::string_view custom = "")
     {
         if (i == 2)
         {
-            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", 18, 4, "", resistor, custom);
+            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", 18, 4, "", resistor(), custom);
         }
         else
         {
@@ -117,7 +135,7 @@ constexpr void resistance(Ohm resistor, std::string_view custom = "")
 
 template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr void dump()
 {
-    fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE);
+    fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE());
     if constexpr (NTCConfig::PullDown)
     {
         resistance(CircuitConfig::PRE_RESISTANCE);

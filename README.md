@@ -14,9 +14,9 @@ This repository shows a simple sampling point calculator for NTC's which will be
 #### Type definition
 
 ```c++
-using Temperature = float;
-using Ohm = float;
-using Volt = float;
+using Temperature = NamedType<float>;
+using Ohm = NamedType<float>;
+using Volt = NamedType<float>;
 ```
 
 #### NTC configuration
@@ -24,8 +24,8 @@ using Volt = float;
 ```c++
 struct NTCConfig
 {
-    static constexpr Temperature REF_TEMPERATURE = {25.0f}; // reference temperature (see datasheet)
-    static constexpr Ohm RESISTANCE = {10000.0f}; // describes the NTC at defined REF_TEMPERATURE
+    static constexpr auto REF_TEMPERATURE = Temperature(25.0f); // reference temperature (see datasheet)
+    static constexpr auto RESISTANCE = Ohm(10000.0f); // describes the NTC at defined REF_TEMPERATURE
     static constexpr float B_CONSTANT = {4100.0f}; // see datasheet for beta constant
     static constexpr bool PullDown = {true}; // defines if the NTC is pull-up <false> or pull-down <true>
 };
@@ -36,11 +36,11 @@ struct NTCConfig
 ```c++
 struct CircuitConfig
 {
-    static constexpr Temperature MIN_TEMPERATURE = -10.0f; // minimum temperature for sampling points
-    static constexpr Temperature MAX_TEMPERATURE = 100.0f; // minimum temperature for sampling points
+    static constexpr auto MIN_TEMPERATURE = Temperature(-10.0f); // minimum temperature for sampling points
+    static constexpr auto MAX_TEMPERATURE = Temperature(100.0f); // minimum temperature for sampling points
     static constexpr uint32_t COUNT = 24; // sampling count, temperature steps will be automatically calculated
-    static constexpr Volt SUPPLY_VOLTAGE = {3.3f}; // defines the voltage given
-    static constexpr Ohm PRE_RESISTANCE = {10000.0f}; // defines the preseries resistor
+    static constexpr auto SUPPLY_VOLTAGE = Volt(3.3f); // defines the voltage given
+    static constexpr auto PRE_RESISTANCE = Ohm(10000.0f); // defines the preseries resistor
 };
 
 ```
@@ -50,12 +50,18 @@ struct CircuitConfig
 ```c++
 struct OhmTemperature
 {
-    Ohm ohm;
+    OhmTemperature() = default;
+    constexpr OhmTemperature(const Ohm& resist, const Temperature& temperature) : resistance(resist()), temp(temperature()){};
+    constexpr OhmTemperature(float resist, float temperature) : resistance(resist), temp(temperature){};
+    Ohm resistance;
     Temperature temp;
 };
 
 struct VoltTemperature
 {
+    VoltTemperature() = default;
+    constexpr VoltTemperature(const Volt& volt, const Temperature& temperature) : voltage(volt()), temp(temperature()){};
+    constexpr VoltTemperature(float volt, float temperature) : voltage(volt), temp(temperature){};
     Volt voltage;
     Temperature temp;
 };
@@ -81,22 +87,23 @@ For this example check out the **source/main.cpp**
 ```c++
 struct NTCConfig
 {
-    static constexpr Ohm RESISTANCE = {10000.0f};
-    static constexpr float B_CONSTANT = {4100.0f};
-    static constexpr Temperature REF_TEMPERATURE = {25.0f};
-    static constexpr bool PullDown = {true};
+    static constexpr auto RESISTANCE = Ohm(10000.0f);
+    static constexpr float B_CONSTANT{4100.0f};
+    static constexpr auto REF_TEMPERATURE = Temperature(25.0f);
+    static constexpr bool PullDown{true};
 };
 
 struct CircuitConfig
 {
-    static constexpr Temperature MIN_TEMPERATURE = -10.0f;
-    static constexpr Temperature MAX_TEMPERATURE = 100.0f;
-    static constexpr uint32_t COUNT = 24;
-    static constexpr Volt SUPPLY_VOLTAGE = {3.3f};
-    static constexpr Ohm PRE_RESISTANCE = {10000.0f};
+    static constexpr auto MIN_TEMPERATURE = Temperature(-10.0f);
+    static constexpr auto MAX_TEMPERATURE = Temperature(100.0f);
+    static constexpr uint32_t COUNT{24u};
+    static constexpr auto SUPPLY_VOLTAGE = Volt(3.3f);
+    static constexpr auto PRE_RESISTANCE = Ohm(10000.0f);
 };
 
 constexpr uint8_t ADC_RESOLUTION = 12u;
+constexpr auto Conversion = [](auto value) { return static_cast<float>(value) * CircuitConfig::SUPPLY_VOLTAGE() * 1000.0f / Math::pow(2, ADC_RESOLUTION); };
 
 int main()
 {
@@ -104,8 +111,11 @@ int main()
     fmt::print("Count: {0}\n", CircuitConfig::COUNT);
     for (const auto& t : ntcPoints)
     {
-        fmt::print("{0} - {1}mV\n", t, t * CircuitConfig::SUPPLY_VOLTAGE * 1000.0f / Math::pow(2, ADC_RESOLUTION));
+        fmt::print("{0} - {1}mV\n", t, Conversion(t));
     }
+
+    // dump the circuit as ASCII
+    NTC::Draw::dump<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
 }
 
 ```
@@ -132,4 +142,3 @@ constexpr auto ntcSamplingPoints = NTC::samplingPointCalculator<CircuitConfig, N
 [Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/aT6GY7K1Y)
 
 ## To-Do
-
