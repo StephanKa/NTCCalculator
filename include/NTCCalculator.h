@@ -3,6 +3,8 @@
 #include <cmath>
 #include <cstdint>
 #include <fmt/format.h>
+#include <vector>
+#include <functional>
 
 template<typename T> class NamedType
 {
@@ -23,11 +25,13 @@ private:
 };
 
 namespace Math {
+constexpr auto EXP_COUNT = 9;
+
 constexpr float pow(float x, int y) { return y == 0 ? 1.0f : x * pow(x, y - 1); }
 
 constexpr int factorial(int x) { return x == 0 ? 1 : x * factorial(x - 1); }
 
-template<int EXP_COUNT = 9> constexpr float exp(float x)
+constexpr float exp(float x)
 {
     float temp = 1.0f + x;
     for (int i = 2; i <= EXP_COUNT; i++)
@@ -86,10 +90,10 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
 template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
 {
     std::array<VoltTemperature, CircuitConfig::COUNT> voltages;
-    size_t index = 0u;
-    for (const auto& resist : resistance<CircuitConfig, NTCConfig>())
+    [[ maybe_unused ]] size_t index = 0u;
+    for ([[ maybe_unused ]] const auto& resist : resistance<CircuitConfig, NTCConfig>())
     {
-        auto voltage = 0.0f;
+        [[ maybe_unused ]] auto voltage = 0.0f;
         if constexpr (NTCConfig::PullDown)
         {
             voltage = CircuitConfig::SUPPLY_VOLTAGE() * (CircuitConfig::PRE_RESISTANCE() / (resist.resistance() + CircuitConfig::PRE_RESISTANCE()));
@@ -106,57 +110,63 @@ template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
 
 template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr auto samplingPointCalculator()
 {
-    constexpr auto powAdc = Math::pow(2, AdcResolution);
+    [[ maybe_unused ]] constexpr auto POW_ADC = Math::pow(2, AdcResolution);
     std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
-    size_t index = 0u;
-    for (const auto& volt : voltage<CircuitConfig, NTCConfig>())
+    [[ maybe_unused ]]size_t index = 0u;
+    for ([[ maybe_unused ]] const auto& volt : voltage<CircuitConfig, NTCConfig>())
     {
-        samplingPoints[index] = static_cast<uint16_t>((powAdc * volt.voltage()) / CircuitConfig::SUPPLY_VOLTAGE());
+        samplingPoints[index] = static_cast<uint16_t>((POW_ADC * volt.voltage()) / CircuitConfig::SUPPLY_VOLTAGE());
         index++;
     }
     return samplingPoints;
 }
 
 namespace Draw {
+constexpr std::string_view NTC = "(NTC)";
+constexpr auto PRE_INDENTATION = 18;
+constexpr auto RESISTOR_HEIGHT = 5;
+constexpr auto RESISTOR_DEFINITION = 2;
+constexpr auto INDENTATION_OFFSET = 20;
+
 constexpr void resistance(Ohm resistor, std::string_view custom = "")
 {
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < RESISTOR_HEIGHT; i++)
     {
-        if (i == 2)
+        if (i == RESISTOR_DEFINITION)
         {
-            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", 18, 4, "", resistor(), custom);
+            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", PRE_INDENTATION, 4, "", resistor(), custom);
         }
         else
         {
-            fmt::print("{0:>{1}}{0:>{2}}\n", "|", 18, 4);
+            fmt::print("{0:>{1}}{0:>{2}}\n", "|", PRE_INDENTATION, 4);
         }
     }
 }
 
 template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr void dump()
 {
-    fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", 20, CircuitConfig::SUPPLY_VOLTAGE());
+    fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", INDENTATION_OFFSET, CircuitConfig::SUPPLY_VOLTAGE());
     if constexpr (NTCConfig::PullDown)
     {
         resistance(CircuitConfig::PRE_RESISTANCE);
     }
     else
     {
-        resistance(NTCConfig::RESISTANCE, "(NTC)");
+        resistance(NTCConfig::RESISTANCE, NTC);
     }
 
-    fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", 20, "|", "", AdcResolution);
+    fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", INDENTATION_OFFSET, "|", "", AdcResolution);
 
     if constexpr (NTCConfig::PullDown)
     {
-        resistance(NTCConfig::RESISTANCE, "(NTC)");
+        resistance(NTCConfig::RESISTANCE, NTC);
     }
     else
     {
         resistance(CircuitConfig::PRE_RESISTANCE);
     }
 
-    fmt::print("{2:>{1}}\n{2:>{1}}\n{2:>{1}}\n{0:-^{3}}\n", "", 20, "|", 19);
+    fmt::print("{2:>{1}}\n{2:>{1}}\n{2:>{1}}\n{0:-^{3}}\n", "", INDENTATION_OFFSET, "|", 19);
 }
 }  // namespace Draw
 }  // namespace NTC
