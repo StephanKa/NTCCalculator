@@ -1,4 +1,4 @@
-Checks: -*,clang-analyzer-*,cert*,cppcoreguidelines*,readability-magic-numbers*,readability-identifier-naming*,readability-container-size-empty
+Checks: -*,clang-analyzer-*,cert*,readability-magic-numbers*,readability-identifier-naming*,readability-container-size-empty
 CheckOptions:
   - key: readability-identifier-naming.TypedefCase
     value: CamelCase

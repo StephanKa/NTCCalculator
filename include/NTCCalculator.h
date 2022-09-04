@@ -3,8 +3,8 @@
 #include <cmath>
 #include <cstdint>
 #include <fmt/format.h>
-#include <vector>
 #include <functional>
+#include <vector>
 
 template<typename T> class NamedType
 {
@@ -90,10 +90,10 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
 template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
 {
     std::array<VoltTemperature, CircuitConfig::COUNT> voltages;
-    [[ maybe_unused ]] size_t index = 0u;
-    for ([[ maybe_unused ]] const auto& resist : resistance<CircuitConfig, NTCConfig>())
+    [[maybe_unused]] size_t index = 0u;
+    for ([[maybe_unused]] const auto& resist : resistance<CircuitConfig, NTCConfig>())
     {
-        [[ maybe_unused ]] auto voltage = 0.0f;
+        [[maybe_unused]] auto voltage = 0.0f;
         if constexpr (NTCConfig::PullDown)
         {
             voltage = CircuitConfig::SUPPLY_VOLTAGE() * (CircuitConfig::PRE_RESISTANCE() / (resist.resistance() + CircuitConfig::PRE_RESISTANCE()));
@@ -110,10 +110,10 @@ template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
 
 template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr auto samplingPointCalculator()
 {
-    [[ maybe_unused ]] constexpr auto POW_ADC = Math::pow(2, AdcResolution);
+    [[maybe_unused]] constexpr auto POW_ADC = Math::pow(2, AdcResolution);
     std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
-    [[ maybe_unused ]]size_t index = 0u;
-    for ([[ maybe_unused ]] const auto& volt : voltage<CircuitConfig, NTCConfig>())
+    [[maybe_unused]] size_t index = 0u;
+    for ([[maybe_unused]] const auto& volt : voltage<CircuitConfig, NTCConfig>())
     {
         samplingPoints[index] = static_cast<uint16_t>((POW_ADC * volt.voltage()) / CircuitConfig::SUPPLY_VOLTAGE());
         index++;
