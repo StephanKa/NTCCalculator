@@ -90,7 +90,7 @@ struct NTCConfig
     static constexpr auto RESISTANCE = Ohm(10000.0f);
     static constexpr float B_CONSTANT{4100.0f};
     static constexpr auto REF_TEMPERATURE = Temperature(25.0f);
-    static constexpr bool PullDown{true};
+    static constexpr bool PULL_DOWN{true};
 };
 
 struct CircuitConfig
@@ -103,19 +103,20 @@ struct CircuitConfig
 };
 
 constexpr uint8_t ADC_RESOLUTION = 12u;
-constexpr auto Conversion = [](auto value) { return static_cast<float>(value) * CircuitConfig::SUPPLY_VOLTAGE() * 1000.0f / Math::pow(2, ADC_RESOLUTION); };
+constexpr auto CONVERSION = [](auto value) { return static_cast<float>(value) * CircuitConfig::SUPPLY_VOLTAGE() * 1000.0f / Math::pow(2, ADC_RESOLUTION); };
 
 int main()
 {
-    constexpr auto ntcPoints = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+    constexpr auto NTC_POINTS = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
     fmt::print("Count: {0}\n", CircuitConfig::COUNT);
-    for (const auto& t : ntcPoints)
+    for (const auto& t : NTC_POINTS)
     {
-        fmt::print("{0} - {1}mV\n", t, Conversion(t));
+        fmt::print("{0} - {1}mV\n", t, CONVERSION(t));
     }
 
     // dump the circuit as ASCII
     NTC::Draw::dump<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+    return 0;
 }
 
 ```
@@ -126,19 +127,73 @@ int main()
 constexpr OhmTemperature resistances = NTC::resistance<CircuitConfig, NTCConfig, IntegrateTempOffset>();
 ```
 
-[Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/PGxqnM196)
+[Compiler Explorer: GCC 12.2 & Clang 14.0.0](https://godbolt.org/z/4K5r4716b)
 
 ```c++
 constexpr VoltTemperature voltages = NTC::voltage<CircuitConfig, NTCConfig>();
 ```
 
-[Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/479coovdd)
+[Compiler Explorer: GCC 12.2 & Clang 14.0.0](https://godbolt.org/z/Gz7bon54o)
 
 ```c++
 constexpr uint8_t ADC_RESOLUTION = 12u;
 constexpr auto ntcSamplingPoints = NTC::samplingPointCalculator<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
 ```
 
-[Compiler Explorer: GCC 11.2 & Clang 12.0.1](https://godbolt.org/z/aT6GY7K1Y)
+[Compiler Explorer: GCC 12.2 & Clang 14.0.0](https://godbolt.org/z/cTsej7Gjs)
+
+```c++
+struct NTCConfig
+{
+    static constexpr auto RESISTANCE = Ohm(10000.0f);
+    static constexpr float B_CONSTANT{4100.0f};
+    static constexpr auto REF_TEMPERATURE = Temperature(25.0f);
+    static constexpr bool PULL_DOWN{true};
+};
+
+struct CircuitConfig
+{
+    static constexpr auto MIN_TEMPERATURE = Temperature(-10.0f);
+    static constexpr auto MAX_TEMPERATURE = Temperature(100.0f);
+    static constexpr uint32_t COUNT{24u};
+    static constexpr auto SUPPLY_VOLTAGE = Volt(3.3f);
+    static constexpr auto PRE_RESISTANCE = Ohm(10000.0f);
+};
+
+constexpr uint8_t ADC_RESOLUTION = 12u;
+
+int main()
+{
+    // dump the circuit as ASCII
+    NTC::Draw::dump<CircuitConfig, NTCConfig, ADC_RESOLUTION>();
+    return 0;
+}
+```
+Output
+```bash
+3.3V---------------
+                   |
+                   |
+                   |
+                 |   |
+                 |   |
+                 |   |     R1  = 10000 Ohm
+                 |   |
+                 |   |
+                   |
+                   | ---------------------> 12 Bit ADC
+                   |
+                 |   |
+                 |   |
+                 |   |     R1 (NTC) = 10000 Ohm
+                 |   |
+                 |   |
+                   |
+                   |
+                   |
+-------------------
+```
+
+[Compiler Explorer: GCC 12.2 & Clang 14.0.0](https://godbolt.org/z/eqcbKoWvs)
 
 ## To-Do
