@@ -19,7 +19,7 @@ CheckOptions:
   - key: readability-identifier-naming.PrivateMemberPrefix
     value: m_
   - key: readability-identifier-naming.ClassConstantCase
-    value: CamelCase
+    value: UPPER_CASE
   - key: readability-identifier-naming.EnumCase
     value: CamelCase
   - key: readability-identifier-naming.LocalConstantCase

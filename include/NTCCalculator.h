@@ -66,7 +66,7 @@ struct VoltTemperature
     Temperature temp;
 };
 
-static constexpr Temperature OFFSET{273.15f};
+inline constexpr Temperature OFFSET{273.15f};
 
 template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> constexpr auto resistance()
 {
@@ -94,7 +94,7 @@ template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
     for ([[maybe_unused]] const auto& resist : resistance<CircuitConfig, NTCConfig>())
     {
         [[maybe_unused]] auto voltage = 0.0f;
-        if constexpr (NTCConfig::PullDown)
+        if constexpr (NTCConfig::PULL_DOWN)
         {
             voltage = CircuitConfig::SUPPLY_VOLTAGE() * (CircuitConfig::PRE_RESISTANCE() / (resist.resistance() + CircuitConfig::PRE_RESISTANCE()));
         }
@@ -130,15 +130,17 @@ constexpr auto INDENTATION_OFFSET = 20;
 
 constexpr void resistance(Ohm resistor, std::string_view custom = "")
 {
+    constexpr std::string_view RESISTOR_STRING = "{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n";
+    constexpr std::string_view INDENTATION_STRING = "{0:>{1}}{0:>{2}}\n";
     for (int i = 0; i < RESISTOR_HEIGHT; i++)
     {
         if (i == RESISTOR_DEFINITION)
         {
-            fmt::print("{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n", "|", PRE_INDENTATION, 4, "", resistor(), custom);
+            fmt::print(RESISTOR_STRING, "|", PRE_INDENTATION, 4, "", resistor(), custom);
         }
         else
         {
-            fmt::print("{0:>{1}}{0:>{2}}\n", "|", PRE_INDENTATION, 4);
+            fmt::print(INDENTATION_STRING, "|", PRE_INDENTATION, 4);
         }
     }
 }
@@ -146,7 +148,7 @@ constexpr void resistance(Ohm resistor, std::string_view custom = "")
 template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr void dump()
 {
     fmt::print("{4:.1f}V{0:-^{1}}\n{2:>{3}}\n{2:>{3}}\n{2:>{3}}\n", "", 15, "|", INDENTATION_OFFSET, CircuitConfig::SUPPLY_VOLTAGE());
-    if constexpr (NTCConfig::PullDown)
+    if constexpr (NTCConfig::PULL_DOWN)
     {
         resistance(CircuitConfig::PRE_RESISTANCE);
     }
@@ -157,7 +159,7 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> cons
 
     fmt::print("{1:>{0}}\n{1:>{0}} {2:-^{0}}-> {3} Bit ADC\n{1:>{0}}\n", INDENTATION_OFFSET, "|", "", AdcResolution);
 
-    if constexpr (NTCConfig::PullDown)
+    if constexpr (NTCConfig::PULL_DOWN)
     {
         resistance(NTCConfig::RESISTANCE, NTC);
     }
