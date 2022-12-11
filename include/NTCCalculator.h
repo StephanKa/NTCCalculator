@@ -9,6 +9,7 @@
 template<typename T> class NamedType
 {
 public:
+    using Type = T;
     NamedType() = default;
     constexpr explicit NamedType(const T& value) : m_value(value) {}
     constexpr explicit NamedType(T&& value) : m_value(std::move(value)) {}
@@ -46,6 +47,12 @@ constexpr float exp(float x)
 using Temperature = NamedType<float>;
 using Ohm = NamedType<float>;
 using Volt = NamedType<float>;
+
+namespace UnitLiterals {
+constexpr auto operator""_Temp(long double d) { return Temperature{static_cast<Temperature::Type>(d)}; }
+constexpr auto operator""_Ohm(long double d) { return Ohm{static_cast<Ohm::Type>(d)}; }
+constexpr auto operator""_Volt(long double d) { return Volt{static_cast<Volt::Type>(d)}; }
+}  // namespace UnitLiterals
 
 namespace NTC {
 struct OhmTemperature

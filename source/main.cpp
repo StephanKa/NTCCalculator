@@ -1,20 +1,21 @@
 #include "NTCCalculator.h"
 
+using namespace UnitLiterals;
 struct NTCConfig
 {
-    static constexpr auto RESISTANCE = Ohm(10000.0f);
+    static constexpr auto RESISTANCE = 10000.0_Ohm;
     static constexpr float B_CONSTANT{4100.0f};
-    static constexpr auto REF_TEMPERATURE = Temperature(25.0f);
+    static constexpr auto REF_TEMPERATURE = 25.0_Temp;
     static constexpr bool PULL_DOWN{true};
 };
 
 struct CircuitConfig
 {
-    static constexpr auto MIN_TEMPERATURE = Temperature(-10.0f);
-    static constexpr auto MAX_TEMPERATURE = Temperature(100.0f);
+    static constexpr auto MIN_TEMPERATURE = Temperature(-10.0);
+    static constexpr auto MAX_TEMPERATURE = 100.0_Temp;
     static constexpr uint32_t COUNT{24u};
-    static constexpr auto SUPPLY_VOLTAGE = Volt(3.3f);
-    static constexpr auto PRE_RESISTANCE = Ohm(10000.0f);
+    static constexpr auto SUPPLY_VOLTAGE = 3.3_Volt;
+    static constexpr auto PRE_RESISTANCE = 10000.0_Ohm;
 };
 
 constexpr uint8_t ADC_RESOLUTION = 12u;
