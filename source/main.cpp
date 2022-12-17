@@ -1,6 +1,6 @@
 #include "NTCCalculator.h"
 
-using namespace UnitLiterals;
+using namespace unit_literals;
 struct NTCConfig
 {
     static constexpr auto RESISTANCE = 10000.0_Ohm;

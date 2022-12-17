@@ -14,9 +14,18 @@ This repository shows a simple sampling point calculator for NTC's which will be
 #### Type definition
 
 ```c++
-using Temperature = NamedType<float>;
-using Ohm = NamedType<float>;
-using Volt = NamedType<float>;
+struct Temperature : public NamedType<float>
+{
+    using NamedType::NamedType;
+};
+struct Ohm : NamedType<float>
+{
+    using NamedType::NamedType;
+};
+struct Volt : NamedType<float>
+{
+    using NamedType::NamedType;
+};
 ```
 
 #### NTC configuration
@@ -169,7 +178,9 @@ int main()
     return 0;
 }
 ```
+
 Output
+
 ```bash
 3.3V---------------
                    |

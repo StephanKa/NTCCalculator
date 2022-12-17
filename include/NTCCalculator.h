@@ -44,15 +44,24 @@ constexpr float exp(float x)
 
 }  // namespace Math
 
-using Temperature = NamedType<float>;
-using Ohm = NamedType<float>;
-using Volt = NamedType<float>;
+struct Temperature : public NamedType<float>
+{
+    using NamedType::NamedType;
+};
+struct Ohm : NamedType<float>
+{
+    using NamedType::NamedType;
+};
+struct Volt : NamedType<float>
+{
+    using NamedType::NamedType;
+};
 
-namespace UnitLiterals {
+namespace unit_literals {
 constexpr auto operator""_Temp(long double d) { return Temperature{static_cast<Temperature::Type>(d)}; }
 constexpr auto operator""_Ohm(long double d) { return Ohm{static_cast<Ohm::Type>(d)}; }
 constexpr auto operator""_Volt(long double d) { return Volt{static_cast<Volt::Type>(d)}; }
-}  // namespace UnitLiterals
+}  // namespace unit_literals
 
 namespace NTC {
 struct OhmTemperature
@@ -87,7 +96,7 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
         OhmTemperature temp(RESISTANCE, TEMPERATURE_STEP);
         if constexpr (IntegrateOffset)
         {
-            temp.temp = OFFSET() + TEMPERATURE_STEP;
+            temp.temp = static_cast<Temperature>(OFFSET() + TEMPERATURE_STEP);
         }
         resistances[i] = temp;
     }
