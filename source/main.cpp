@@ -19,7 +19,8 @@ struct CircuitConfig
 };
 
 constexpr uint8_t ADC_RESOLUTION = 12u;
-constexpr auto CONVERSION = [](auto value) { return static_cast<float>(value) * CircuitConfig::SUPPLY_VOLTAGE() * 1000.0f / Math::pow(2, ADC_RESOLUTION); };
+constexpr auto CONVERSION_FACTOR = 1000.0f;
+constexpr auto CONVERSION = [](auto value) { return static_cast<float>(value) * CircuitConfig::SUPPLY_VOLTAGE() * CONVERSION_FACTOR / Math::pow(2, ADC_RESOLUTION); };
 
 int main()
 {
