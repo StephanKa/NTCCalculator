@@ -26,10 +26,10 @@ jobs:
                     {name: 'Clang 15', cpp: clang++-15, c: clang-15, pkgs: 'clang-15 llvm-15'}
                   ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       env:
         cache-name: cache-conan-modules
       with:
@@ -91,7 +91,7 @@ jobs:
       matrix:
         os: [windows-latest, windows-2019]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install conan
         shell: bash
         run: |
