@@ -46,7 +46,10 @@ jobs:
 
     - name: Install conan
       shell: bash
-      run: source ~/.profile
+      run: |
+           python3 -m pip install --upgrade pip setuptools
+           python3 -m pip install conan
+           source ~/.profile
 
     - name: Configure via CMake
       # Use a bash shell so we can use the same syntax for environment variable
