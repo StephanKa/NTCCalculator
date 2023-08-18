@@ -1,4 +1,10 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.19)
+
+FIND_PACKAGE(Python COMPONENTS Interpreter REQUIRED)
+
+# install PyPI Python package using pip
+EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -m pip install --user --upgrade pip setuptools jinja2 conan)
+
 # Download automatically, you can also just copy the conan.cmake file
 IF(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     MESSAGE(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
@@ -20,11 +26,6 @@ MESSAGE("Using C++ standard ${CMAKE_CXX_STANDARD}")
 
 INCLUDE(cmake/StandardProjectSettings.cmake)
 INCLUDE(cmake/PreventInSourceBuilds.cmake)
-
-FIND_PACKAGE(Python COMPONENTS Interpreter REQUIRED)
-
-# install PyPI Python package using pip
-EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -m pip install --user --upgrade pip setuptools jinja2 conan)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 ADD_LIBRARY(project_options INTERFACE)
