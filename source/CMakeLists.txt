@@ -4,6 +4,6 @@ ADD_EXECUTABLE(${PROJECT_NAME} main.cpp)
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
                       PRIVATE project_options
                       project_warnings
-                      CONAN_PKG::fmt)
+                      fmt::fmt)
 
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE ../include)

@@ -1,4 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.19)
+# Download automatically, you can also just copy the conan.cmake file
+IF(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
+    MESSAGE(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
+    FILE(DOWNLOAD "https://raw.githubusercontent.com/conan-io/cmake-conan/develop2/conan_provider.cmake" "${CMAKE_BINARY_DIR}/conan.cmake" TLS_VERIFY ON)
+ENDIF()
+LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+SET(CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_BINARY_DIR}/conan.cmake")
 
 # Set the project name to your project name, my project isn't very descriptive
 PROJECT(ntc-compile-time CXX)
@@ -17,7 +24,7 @@ INCLUDE(cmake/PreventInSourceBuilds.cmake)
 FIND_PACKAGE(Python COMPONENTS Interpreter REQUIRED)
 
 # install PyPI Python package using pip
-EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -m pip install --user --upgrade pip setuptools jinja2 conan==1.60.2)
+EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -m pip install --user --upgrade pip setuptools jinja2 conan)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 ADD_LIBRARY(project_options INTERFACE)
@@ -67,8 +74,8 @@ IF(ENABLE_PCH)
             <utility>)
 ENDIF()
 
-INCLUDE(cmake/Conan.cmake)
-RUN_CONAN()
+FIND_PACKAGE(fmt REQUIRED)
+FIND_PACKAGE(catch2 REQUIRED)
 
 IF(ENABLE_TESTING)
     ENABLE_TESTING()
