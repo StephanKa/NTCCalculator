@@ -17,7 +17,7 @@ INCLUDE(cmake/PreventInSourceBuilds.cmake)
 FIND_PACKAGE(Python COMPONENTS Interpreter REQUIRED)
 
 # install PyPI Python package using pip
-EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -m pip install --user --upgrade pip setuptools jinja2 conan)
+EXECUTE_PROCESS(COMMAND ${Python_EXECUTABLE} -m pip install --user --upgrade pip setuptools jinja2 conan==1.60.2)
 
 # Link this 'library' to set the c++ standard / compile-time options requested
 ADD_LIBRARY(project_options INTERFACE)
@@ -66,10 +66,6 @@ IF(ENABLE_PCH)
             <vector>
             <utility>)
 ENDIF()
-
-# Set up some extra Conan dependencies based on our needs before loading Conan
-SET(CONAN_EXTRA_REQUIRES "")
-SET(CONAN_EXTRA_OPTIONS "")
 
 INCLUDE(cmake/Conan.cmake)
 RUN_CONAN()
