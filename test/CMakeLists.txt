@@ -18,3 +18,6 @@ CATCH_DISCOVER_TESTS(
         "unittests."
         OUTPUT_SUFFIX
         .xml)
+
+ADD_CUSTOM_COMMAND(TARGET tests POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:tests> ${CMAKE_BINARY_DIR}/install/bin/$<TARGET_FILE_NAME:tests>)
