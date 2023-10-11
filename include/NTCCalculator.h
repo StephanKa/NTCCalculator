@@ -28,11 +28,11 @@ private:
 namespace Math {
 constexpr auto EXP_COUNT = 9;
 
-constexpr float pow(float x, int y) { return y == 0 ? 1.0f : x * pow(x, y - 1); }
+[[nodiscard]] constexpr float pow(float x, int y) { return y == 0 ? 1.0f : x * pow(x, y - 1); }
 
-constexpr int factorial(int x) { return x == 0 ? 1 : x * factorial(x - 1); }
+[[nodiscard]] constexpr int factorial(int x) { return x == 0 ? 1 : x * factorial(x - 1); }
 
-constexpr float exp(float x)
+[[nodiscard]] constexpr float exp(float x)
 {
     float temp = 1.0f + x;
     for (int i = 2; i <= EXP_COUNT; i++)
@@ -84,7 +84,7 @@ struct VoltTemperature
 
 inline constexpr Temperature OFFSET{273.15f};
 
-template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> constexpr auto resistance()
+template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true> [[nodiscard]] constexpr auto resistance()
 {
     std::array<OhmTemperature, CircuitConfig::COUNT> resistances;
     constexpr auto REF_TEMP_OFFSET = OFFSET() + NTCConfig::REF_TEMPERATURE();
@@ -103,7 +103,7 @@ template<typename CircuitConfig, typename NTCConfig, bool IntegrateOffset = true
     return resistances;
 }
 
-template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
+template<typename CircuitConfig, typename NTCConfig> [[nodiscard]] constexpr auto voltage()
 {
     std::array<VoltTemperature, CircuitConfig::COUNT> voltages;
     [[maybe_unused]] size_t index = 0u;
@@ -124,7 +124,7 @@ template<typename CircuitConfig, typename NTCConfig> constexpr auto voltage()
     return voltages;
 }
 
-template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> constexpr auto samplingPointCalculator()
+template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution> [[nodiscard]] constexpr auto samplingPointCalculator()
 {
     [[maybe_unused]] constexpr auto POW_ADC = Math::pow(2, AdcResolution);
     std::array<uint16_t, CircuitConfig::COUNT> samplingPoints = {0};
