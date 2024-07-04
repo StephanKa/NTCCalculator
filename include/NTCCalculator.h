@@ -148,7 +148,7 @@ template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution>
     [[maybe_unused]] size_t index = 0u;
     for ([[maybe_unused]] const auto &volt : voltage<CircuitConfig, NTCConfig>()) {
         samplingPoints[index] = static_cast<uint16_t>((POW_ADC * volt.voltage()) / CircuitConfig::SUPPLY_VOLTAGE());
-        index++;
+        ++index;
     }
     return samplingPoints;
 }
@@ -167,9 +167,9 @@ namespace Draw {
         for (int i = 0; i < RESISTOR_HEIGHT; i++) {
             if (i == RESISTOR_DEFINITION) {
                 fmt::print(RESISTOR_STRING, "|", PRE_INDENTATION, 4, "", resistor(), custom);
-            } else {
-                fmt::print(INDENTATION_STRING, "|", PRE_INDENTATION, 4);
+                continue;
             }
+            fmt::print(INDENTATION_STRING, "|", PRE_INDENTATION, 4);
         }
     }
 

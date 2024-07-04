@@ -4,16 +4,16 @@ using namespace unit_literals;
 struct NTCConfig
 {
     static constexpr auto RESISTANCE = 10000.0_Ohm;
-    static constexpr float B_CONSTANT{ 4100.0f };
+    static constexpr auto B_CONSTANT{ 4100.0f };
     static constexpr auto REF_TEMPERATURE = 25.0_Temp;
-    static constexpr bool PULL_DOWN{ true };
+    static constexpr auto PULL_DOWN{ false };
 };
 
 struct CircuitConfig
 {
     static constexpr auto MIN_TEMPERATURE = Temperature(-10.0);
     static constexpr auto MAX_TEMPERATURE = 100.0_Temp;
-    static constexpr uint32_t COUNT{ 24u };
+    static constexpr uint32_t COUNT{ 32u };
     static constexpr auto SUPPLY_VOLTAGE = 3.3_Volt;
     static constexpr auto PRE_RESISTANCE = 10000.0_Ohm;
 };

@@ -9,6 +9,20 @@ env:
   CONAN_USER_HOME_SHORT: "${{ github.workspace }}/conan-cache/short"
 
 jobs:
+  docker:
+    name: Test docker images
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build docker-ci image
+        shell: bash
+        run: cd docker && ./build-ci-image.sh
+
+      - name: Build docker-dev image
+        shell: bash
+        run: cd docker && ./build-dev-image.sh
+
   linux:
     name: ${{ matrix.os }}, ${{ matrix.compiler.name }}, ${{ matrix.buildtype }}
     runs-on: ${{ matrix.os }}
@@ -26,7 +40,7 @@ jobs:
                     {name: 'Clang 15', preset: clang-15, pkgs: 'clang-15 llvm-15'}
                   ]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Cache
       uses: actions/cache@v3
@@ -82,7 +96,7 @@ jobs:
         os: [windows-2022, windows-2019]
         buildtype: [debug]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install conan
         shell: bash
         run: |
