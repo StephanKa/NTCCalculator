@@ -64,9 +64,6 @@ IF(ENABLE_PCH)
             <utility>)
 ENDIF()
 
-FIND_PACKAGE(fmt REQUIRED)
-FIND_PACKAGE(Catch2 REQUIRED)
-
 IF(ENABLE_TESTING)
     ENABLE_TESTING()
     MESSAGE("Building Tests.")

@@ -3,8 +3,6 @@
 #include <cmath>
 #include <cstdint>
 #include <fmt/format.h>
-#include <functional>
-#include <vector>
 
 template<typename T>
 class NamedType
@@ -55,7 +53,7 @@ constexpr auto EXP_COUNT = 9;
 
 }// namespace Math
 
-struct Temperature : public NamedType<float>
+struct Temperature : NamedType<float>
 {
     using NamedType::NamedType;
 };
@@ -87,8 +85,8 @@ namespace NTC {
 struct OhmTemperature
 {
     OhmTemperature() = default;
-    constexpr OhmTemperature(const Ohm &resist, const Temperature &temperature) : resistance(resist()), temp(temperature()){};
-    constexpr OhmTemperature(float resist, float temperature) : resistance(resist), temp(temperature){};
+    constexpr OhmTemperature(const Ohm &resist, const Temperature &temperature) : resistance(resist()), temp(temperature()) {};
+    constexpr OhmTemperature(float resist, float temperature) : resistance(resist), temp(temperature) {};
     Ohm resistance;
     Temperature temp;
 };
@@ -96,8 +94,8 @@ struct OhmTemperature
 struct VoltTemperature
 {
     VoltTemperature() = default;
-    constexpr VoltTemperature(const Volt &volt, const Temperature &temperature) : voltage(volt()), temp(temperature()){};
-    constexpr VoltTemperature(float volt, float temperature) : voltage(volt), temp(temperature){};
+    constexpr VoltTemperature(const Volt &volt, const Temperature &temperature) : voltage(volt()), temp(temperature()) {};
+    constexpr VoltTemperature(float volt, float temperature) : voltage(volt), temp(temperature) {};
     Volt voltage;
     Temperature temp;
 };
@@ -164,6 +162,7 @@ namespace Draw {
     {
         constexpr std::string_view RESISTOR_STRING = "{0:>{1}}{0:>{2}}{3:>{2}} R1 {5} = {4} Ohm\n";
         constexpr std::string_view INDENTATION_STRING = "{0:>{1}}{0:>{2}}\n";
+        fmt::print("{0:>{1}}\n", "---", PRE_INDENTATION + 3);
         for (int i = 0; i < RESISTOR_HEIGHT; i++) {
             if (i == RESISTOR_DEFINITION) {
                 fmt::print(RESISTOR_STRING, "|", PRE_INDENTATION, 4, "", resistor(), custom);
@@ -171,6 +170,7 @@ namespace Draw {
             }
             fmt::print(INDENTATION_STRING, "|", PRE_INDENTATION, 4);
         }
+        fmt::print("{0:>{1}}\n", "---", PRE_INDENTATION + 3);
     }
 
     template<typename CircuitConfig, typename NTCConfig, uint8_t AdcResolution>

@@ -1,9 +1,12 @@
-ADD_EXECUTABLE(tests tests.cpp)
-TARGET_LINK_LIBRARIES(tests PRIVATE project_warnings project_options fmt::fmt Catch2::Catch2WithMain)
-TARGET_INCLUDE_DIRECTORIES(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
+FIND_PACKAGE(Catch2 REQUIRED)
+FIND_PACKAGE(fmt REQUIRED)
 
 INCLUDE(CTest)
 INCLUDE(Catch)
+
+ADD_EXECUTABLE(tests tests.cpp)
+TARGET_LINK_LIBRARIES(tests PRIVATE project_warnings project_options fmt::fmt-header-only Catch2::Catch2WithMain)
+TARGET_INCLUDE_DIRECTORIES(tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include)
 # automatically discover tests that are defined in catch based test files you can modify the unittests. Set TEST_PREFIX
 # to whatever you want, or use different for different binaries
 CATCH_DISCOVER_TESTS(
